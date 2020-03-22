@@ -1,6 +1,6 @@
 var Discord = require('discord.io');
 var logger = require('winston');
-var auth = require('./auth.json');
+require('dotenv').config()
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
@@ -9,15 +9,14 @@ logger.add(new logger.transports.Console, {
 logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client({
-    token: auth.token,
+    token: process.env.BOT_TOKEN,
     autorun: true
 });
-console.log(auth.token);
-console.log(bot);
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
-    logger.info(bot.username + ' - (' + bot.id + ')');
+    logger.info(bot.username + ' - (' + bot.id + ')');    
+    bot.setPresence({ game: { name: '!help', type: 0 } });    
 });
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
@@ -28,27 +27,22 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         var rollResults = 'Results: ';
         switch (cmd){
             case 'roll':
-                let solicitedRoll = args[1];
+                let solicitedRoll = args.find((element) =>(
+                    element.includes('d')
+                ));                
                 let dices = solicitedRoll.split(';')
                 let sum = 0;               
                 dices.forEach((dice,index)=>{
                     let currentResult = '['
-                    let times = parseInt(dice.substring(0,dice.indexOf('d')));
-                    let currentDice = parseInt(dice.substring(dice.indexOf('d')+1));
+                    let times = getRepetition(dice);
+                    let currentDice = getDiceSize(dice);
                     for(var i=1;i<=times;i++){
                         let currentRoll = Math.floor(Math.random() * currentDice) + 1;
                         sum += currentRoll;
-                        if (i>1)
-                            currentResult = `${currentResult}, ${currentRoll}`
-                        else
-                            currentResult = `${currentResult} ${currentRoll}`
-                        
+                        currentResult = i > 1 ? `${currentResult}, ${currentRoll}` : `${currentResult} ${currentRoll}`
                     }
                     if (dices.length > 1){
-                        if (index == dices.length -1)
-                            currentResult = `${currentResult} ]`                    
-                        else
-                            currentResult = `${currentResult} ];`                    
+                        currentResult = index == dices.length -1 ? `${currentResult} ]` :  `${currentResult} ];`                        
                     }
                     else{
                         currentResult = `${currentResult} ]`                    
@@ -67,7 +61,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     }
                 }
 
-                let solicitedBonus = args[2];
+                let solicitedBonus = args.find((element) => (element.includes('+')));
                 if (solicitedBonus){
                     let toAdd = parseInt(solicitedBonus.substring(solicitedBonus.indexOf('+')+1));
                     sum += toAdd;        
@@ -91,3 +85,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         }        
      }
 });
+
+function getRepetition(roll){
+    return parseInt(roll.substring(0,roll.indexOf('d')));
+}
+
+function getDiceSize(roll){
+    return parseInt(roll.substring(roll.indexOf('d')+1));
+}
