@@ -1,6 +1,6 @@
 {
     "name": "pds-dice-roll",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Dice Roller for TTRPG",
     "main": "bot.js",
     "author": "Everton Ataide",
