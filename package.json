@@ -1,0 +1,14 @@
+{
+    "name": "pds-dice-roll",
+    "version": "1.0.0",
+    "description": "Dice Roller for TTRPG",
+    "main": "bot.js",
+    "author": "Everton Ataide",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "winston": "^3.2.1"
+    },
+    "scripts": {
+        "start": "node bot.js"
+    }
+}
